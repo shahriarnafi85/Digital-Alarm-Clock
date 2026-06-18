@@ -1,0 +1,56 @@
+module digital_clock (
+    input clk,
+    input reset,
+    input [5:0] reset_min,
+    input [4:0] reset_hour,
+    input [5:0] alarm_min,
+    input [4:0] alarm_hour,
+    output reg [5:0] sec,
+    output reg [5:0] min,
+    output reg [4:0] hour,
+    output reg alarm
+);
+
+    reg [5:0] alarm_counter;
+
+    always @(posedge clk) begin
+        if (reset) begin
+            sec  <= 0;
+            min  <= reset_min;
+            hour <= reset_hour;
+            alarm <= 0;
+            alarm_counter <= 0;
+        end
+        else begin
+            // Time counting
+            if (sec == 59) begin
+                sec <= 0;
+                if (min == 59) begin
+                    min <= 0;
+                    if (hour == 23)
+                        hour <= 0;
+                    else
+                        hour <= hour + 1;
+                end
+                else
+                    min <= min + 1;
+            end
+            else
+                sec <= sec + 1;
+
+            // Alarm logic
+            if (hour == alarm_hour && min == alarm_min && alarm_counter == 0) begin
+                alarm <= 1;
+                alarm_counter <= 1;
+            end
+            else if (alarm_counter > 0) begin
+                alarm_counter <= alarm_counter + 1;
+                if (alarm_counter == 60) begin
+                    alarm <= 0;
+                    alarm_counter <= 0;
+                end
+            end
+        end
+    end
+
+endmodule

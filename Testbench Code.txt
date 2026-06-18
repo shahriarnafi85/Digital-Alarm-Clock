@@ -1,0 +1,53 @@
+module digital_clock_tb;
+
+reg clk;
+reg reset;
+reg [5:0] reset_min;
+reg [4:0] reset_hour;
+reg [5:0] alarm_min;
+reg [4:0] alarm_hour;
+
+wire [5:0] sec;
+wire [5:0] min;
+wire [4:0] hour;
+wire alarm;
+
+// DUT instantiation
+digital_clock dut (
+    .clk(clk),
+    .reset(reset),
+    .reset_min(reset_min),
+    .reset_hour(reset_hour),
+    .alarm_min(alarm_min),
+    .alarm_hour(alarm_hour),
+    .sec(sec),
+    .min(min),
+    .hour(hour),
+    .alarm(alarm)
+);
+
+// Generate 1 Hz clock
+initial
+    forever #5 clk = ~clk;
+
+// Waveform generation
+initial begin
+    $shm_open("shm.db",1);
+    $shm_probe("AS");
+    #500 $finish;
+    #520 $shm_close();
+end
+
+// Test vectors
+initial begin
+    clk = 0;
+    reset = 1;
+    reset_hour = 5'd10;
+    reset_min  = 6'd58;
+    alarm_hour = 5'd10;
+    alarm_min  = 6'd59;
+
+    #10 reset = 0;   // release reset
+end
+
+endmodule
